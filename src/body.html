@@ -170,6 +170,35 @@ input[type=range]{width:100%;accent-color:var(--blue);height:28px}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
 .foot{font-size:12.5px;color:var(--muted);line-height:1.7}
 .confirm{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* 文系向け追加解説 */
+.life{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.life li::marker{color:var(--red)}
+.words{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0}
+.words dt{font-weight:900;white-space:nowrap}
+.words dd{margin:0;min-width:0}
+@media (max-width:480px){.words{grid-template-columns:1fr;gap:0}.words dd{margin-bottom:8px}}
+.walk{border:1.5px dashed var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.wq{font-weight:900;font-size:17px}
+.wsteps{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+.wsteps li.new{animation:tin .35s}
+.wa{font-weight:900;font-size:18px}
+.wa-l{display:inline-block;font-size:11px;color:var(--red);border:1.5px solid var(--red);border-radius:4px;padding:0 6px;margin-right:10px;vertical-align:middle;transform:rotate(-4deg)}
+.hands p{background:color-mix(in srgb,var(--green) 9%,transparent);border-radius:10px;padding:10px 14px}
+.tips{font-size:14px;padding:10px 14px;border-radius:10px;background:color-mix(in srgb,var(--marker-hl) 55%,transparent)}
+.tips ul{margin:4px 0 0;padding-left:1.2em}
+.again{margin-top:10px;font-size:14px}
+.again summary{cursor:pointer;font-weight:700;color:var(--blue)}
+.again p{margin:6px 0}
+.guide{padding:18px 22px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.gsteps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+.dict{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.sym{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px}
+.sy{font-size:22px;font-weight:900;text-align:center;line-height:1.3;word-break:break-word}
+.sb{min-width:0;line-height:1.6}
+.rd{font-weight:900;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rd .gtag{font-size:10.5px;padding:0 6px}
+@media (max-width:520px){.top-in{flex-wrap:nowrap;gap:8px}.logo{font-size:15px;white-space:nowrap}.logo i{width:24px;height:24px}.chip-lv{gap:6px;font-size:12px}.xpbar{width:48px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.hana path{stroke-dashoffset:0}}
 </style>
 <header class="top"><div class="top-in">

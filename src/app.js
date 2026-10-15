@@ -45,7 +45,7 @@ function renderChip(){const L=lvOf(S.xp),b=lvBase(L),nx=lvBase(L+1);document.get
 // ---------- router ----------
 let V={name:'home'};let curDraw=null;
 function go(v){V=v;curDraw=null;render();window.scrollTo({top:0,behavior:'instant'in window?'instant':'auto'})}
-function render(){renderChip();const app=document.getElementById('app');if(V.name==='home')return home(app);if(V.name==='unit')return unitView(app);if(V.name==='mix')return quizView(app)}
+function render(){renderChip();const app=document.getElementById('app');if(V.name==='home')return home(app);if(V.name==='unit')return unitView(app);if(V.name==='mix')return quizView(app);if(V.name==='dict')return dictView(app)}
 
 // ---------- home ----------
 function ring(p){const r=54,c=2*Math.PI*r;return `<svg viewBox="0 0 118 118" aria-hidden="true"><circle cx="59" cy="59" r="${r}" fill="none" stroke="var(--grid2)" stroke-width="7"/><circle cx="59" cy="59" r="${r}" fill="none" stroke="var(--red)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-Math.min(1,p))}" transform="rotate(-90 59 59)"/></svg>`}
@@ -63,6 +63,11 @@ function home(app){const L=lvOf(S.xp),dx=S.daily.d===today()?S.daily.xp:0,lu=S.l
     <button class="btn ghost" id="mixbtn">ミックス10問に挑戦</button>
    </div>
   </div>
+ </section>
+ <section class="sheet guide">
+  <div class="eyebrow">数学が苦手な人へ</div>
+  <ol class="gsteps"><li><b>記号は外国語の単語と同じ。</b>読み方と意味がわかれば、こわくない。</li><li><b>まず「たとえ」で意味をつかむ。</b>式を覚えるのはそのあとでいい。</li><li><b>図を動かしてから問題へ。</b>まちがえても、そのたびに「たとえ」で復習できる。</li></ol>
+  <button class="btn ghost" id="dictbtn">記号のよみかた辞典をひらく</button>
  </section>
  <section>
   <div class="eyebrow">学年のみちのり</div>
@@ -84,10 +89,20 @@ function home(app){const L=lvOf(S.xp),dx=S.daily.d===today()?S.daily.xp:0,lu=S.l
  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go({name:'unit',id:b.dataset.go,step:0}));
  app.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{S.grade=b.dataset.g;save();home(app)});
  app.querySelector('#mixbtn').onclick=startMix;
+ app.querySelector('#dictbtn').onclick=()=>go({name:'dict'});
  const rs=app.querySelector('#reset');rs.onclick=e=>{const t=e.target.closest('button');if(!t)return;
   if(t.dataset.reset==='1')rs.innerHTML=`<span>本当に消しますか?</span><button class="btn" data-reset="2" style="padding:5px 14px;font-size:12px;background:var(--red);border-color:var(--red)">消す</button><button class="btn ghost" data-reset="0" style="padding:5px 14px;font-size:12px">やめる</button>`;
   else if(t.dataset.reset==='2'){S={...DEF};save();go({name:'home'})}else home(app)};
 }
+
+// ---------- dictionary ----------
+function dictView(app){let f='すべて';const gs=['すべて','小学','中1','中3','数I','数A','数II','数B','数III','数C'];
+ const draw=()=>{const list=SYM.filter(r=>f==='すべて'||r[4]===f);app.querySelector('#dl').innerHTML=list.map(([sy,rd,mean,ex,g])=>`<div class="sym"><div class="sy">${sy}</div><div class="sb"><div class="rd">${rd}<span class="gtag">${GL(g)}</span></div><div>${mean}</div><small>例:${ex}</small></div></div>`).join('')||'<p>この学年で新しく出てくる記号はありません。</p>';
+  app.querySelectorAll('[data-f]').forEach(b=>b.setAttribute('aria-selected',b.dataset.f===f))};
+ app.innerHTML=`<div class="uhead"><button class="back" id="bk">← もどる</button><h1 style="margin-top:8px">記号のよみかた辞典</h1><div style="color:var(--muted)">読めない記号が出てきたら、ここで確認しよう。読み方がわかると、式が「文章」として読めるようになる。</div></div>
+ <div class="tabs" role="tablist">${gs.map(g=>`<button class="tab" role="tab" data-f="${g}">${GL(g)}</button>`).join('')}</div>
+ <section class="sheet panel dict" id="dl"></section>`;
+ app.querySelector('#bk').onclick=()=>go({name:'home'});app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{f=b.dataset.f;draw()});draw()}
 
 // ---------- unit ----------
 function unitView(app){const u=byId(V.id);S.lastUnit=u.id;save();const st=V.step||0;const done=[S.read[u.id],S.lab[u.id],starsOf(u.id)>0];
@@ -100,9 +115,16 @@ function unitView(app){const u=byId(V.id);S.lastUnit=u.id;save();const st=V.step
  const pn=app.querySelector('#pn');
  if(st===0){pn.innerHTML=`<div class="eyebrow">ひとことで</div><p class="one"><span class="mk">${u.one}</span></p>
   <div class="sec"><h3>たとえば</h3><p style="margin:0">${u.story}</p></div>
+  ${u.life?`<div class="sec"><h3>身の回りのどこにある?</h3><ul class="life">${u.life.map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
+  ${u.words?`<div class="sec"><h3>ことばの言いかえ</h3><dl class="words">${u.words.map(([t,d])=>`<dt>${t}</dt><dd>${d}</dd>`).join('')}</dl></div>`:''}
+  ${u.walk?`<div class="sec"><h3>例題をいっしょに解く</h3><div class="walk"><div class="wq">${u.walk.q}</div><ol class="wsteps"></ol><div class="wa" hidden><span class="wa-l">こたえ</span>${u.walk.a}</div><div class="row"><button class="btn" id="wnext"></button><button class="btn ghost" id="wre" hidden>はじめから</button></div></div></div>`:''}
   <div class="sec"><h3>これだけ覚える</h3><div class="keybox">${u.key}</div></div>
+  ${u.hands?`<div class="sec hands"><h3>手を動かしてみよう</h3><p style="margin:0">${u.hands}</p></div>`:''}
   <div class="sec"><p class="trap" style="margin:0">${u.trap}</p></div>
   <div class="next"><button class="btn hl" id="nx">わかった!さわってみる →</button></div>`;
+  if(u.walk){let k=0;const ol=pn.querySelector('.wsteps'),wa=pn.querySelector('.wa'),nb=pn.querySelector('#wnext'),re=pn.querySelector('#wre');const n=u.walk.s.length;
+   const upd=()=>{ol.innerHTML=u.walk.s.slice(0,k).map(x=>`<li>${x}</li>`).join('');wa.hidden=k<n;nb.hidden=k>=n;re.hidden=k===0;nb.textContent=k===0?'1つ目の手順を見る':`次の手順を見る(${k}/${n})`};
+   nb.onclick=()=>{k++;upd();const li=ol.lastElementChild;if(li)li.classList.add('new')};re.onclick=()=>{k=0;upd()};upd()}
   pn.querySelector('#nx').onclick=()=>{if(!S.read[u.id]){S.read[u.id]=1;addXP(5);toast('+5 XP イメージをつかんだ')}V.step=1;unitView(app)}}
  else if(st===1){mountLab(u,pn);const nx=document.createElement('div');nx.className='next';nx.innerHTML=`<button class="btn hl">チャレンジ 5問へ →</button>`;pn.appendChild(nx);nx.firstChild.onclick=()=>{V.step=2;unitView(app)}}
  else startQuiz(pn,[u],5,'unit');
@@ -110,7 +132,8 @@ function unitView(app){const u=byId(V.id);S.lastUnit=u.id;save();const st=V.step
 
 function mountLab(u,host){const spec=LABS[u.lab];const st={opt:u.labOpt||{}};spec.init&&spec.init(st);const v={};spec.sliders.forEach(s=>v[s.k]=s.v);
  const fmt=(s,x)=>(s.step<1?fmtN(x):neg(x))+(s.u||'');
- host.innerHTML=`<div class="lab"><div class="eyebrow">スライダーを動かして、変化を見てみよう</div><div class="cvwrap"><canvas class="cv" role="img" aria-label="${u.t}の動く図"></canvas></div><div class="readout" aria-live="polite"></div>
+ const tips=TIPS[u.lab]||[];
+ host.innerHTML=`<div class="lab"><div class="eyebrow">スライダーを動かして、変化を見てみよう</div>${tips.length?`<div class="tips"><b>やってみよう</b><ul>${tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>`:''}<div class="cvwrap"><canvas class="cv" role="img" aria-label="${u.t}の動く図"></canvas></div><div class="readout" aria-live="polite"></div>
  <div class="ctrls">${spec.sliders.map(s=>`<div class="sl"><label for="s-${u.id}-${s.k}">${s.l}<output data-sv="${s.k}">${fmt(s,s.v)}</output></label><input type="range" id="s-${u.id}-${s.k}" data-k="${s.k}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.v}"></div>`).join('')}</div>
  ${spec.buttons?`<div class="row">${spec.buttons.map((b,i)=>`<button class="btn ghost" data-b="${i}">${b.l}</button>`).join('')}</div>`:''}</div>`;
  const cv=host.querySelector('canvas'),ro=host.querySelector('.readout');
@@ -136,14 +159,14 @@ function nextQ(){const {host}=Q;if(Q.i>=Q.n)return endQuiz();const u=Q.units.len
  <div class="q">${q.q}</div>
  <div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${o}</span></button>`).join('')}</div>
  <div class="row" style="margin-top:12px" id="hrow"><button class="btn ghost" id="hb" style="padding:6px 14px;font-size:13px">ヒントを見る(獲得XP 半分)</button></div><div id="fbx"></div>`;
- host.querySelector('#hb').onclick=()=>{Q.hint=true;host.querySelector('#hrow').innerHTML=`<div class="hint"><b>ヒント</b> ${u.key}</div>`};
+ host.querySelector('#hb').onclick=()=>{Q.hint=true;host.querySelector('#hrow').innerHTML=`<div class="hint"><b>ヒント</b> ${u.one}<div class="keybox" style="margin-top:8px;font-size:15px">${u.key}</div></div>`};
  host.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.i));
  const k=e=>{if(!Q||Q.cur!==q)return document.removeEventListener('keydown',k);const i='abcd'.indexOf(e.key.toLowerCase());if(i>=0&&i<q.opts.length&&!host.querySelector('.opt:disabled'))answer(i)};document.addEventListener('keydown',k)}
 function answer(i){const {host,cur:q}=Q;const hb=host.querySelector('#hb');if(hb)hb.remove();const ok=i===q.correct;host.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(j===q.correct)b.classList.add('ok');else if(j===i)b.classList.add('ng')});
  S.answered++;let gain=0;
  if(ok){Q.combo++;Q.score++;S.correct++;S.maxCombo=Math.max(S.maxCombo,Q.combo);gain=(Q.hint?5:10)+Math.min(Q.combo-1,5)*2;Q.xp+=gain;addXP(gain)}else{Q.combo=0;save()}
  Q.res.push(ok);
- const fb=host.querySelector('#fbx');fb.innerHTML=`<div class="fb ${ok?'ok':'ng'}">${ok?HANA:'<div class="verdict" style="font-size:34px">✓</div>'}<div><div class="verdict">${ok?pick(['正解!','おみごと!','その調子!','バッチリ!']):'おしい!'}${ok?` <small>+${gain} XP</small>`:''}</div><div>${q.ex}</div>${ok?'':`<small>正しい答え:${q.a}</small>`}</div></div>
+ const fb=host.querySelector('#fbx');fb.innerHTML=`<div class="fb ${ok?'ok':'ng'}">${ok?HANA:'<div class="verdict" style="font-size:34px">✓</div>'}<div><div class="verdict">${ok?pick(['正解!','おみごと!','その調子!','バッチリ!']):'おしい!'}${ok?` <small>+${gain} XP</small>`:''}</div><div>${q.ex}</div>${ok?'':`<small>正しい答え:${q.a}</small><details class="again"><summary>たとえで思い出す</summary><p><span class="mk">${q.u.one}</span></p><p>${q.u.story}</p>${q.u.walk?`<p><b>例題:</b>${q.u.walk.q} → ${q.u.walk.s.join(' → ')} → <b>${q.u.walk.a}</b></p>`:''}</details>`}</div></div>
  <div class="next"><button class="btn hl" id="nq">${Q.i+1>=Q.n?'結果を見る':'次の問題 →'}</button></div>`;
  const nb=fb.querySelector('#nq');nb.onclick=()=>{Q.i++;nextQ()};nb.focus({preventScroll:true});fb.scrollIntoView({block:'nearest',behavior:'smooth'})}
 function endQuiz(){const {host,mode,units,score,n}=Q;let stars=0,bonus=0,msg='';

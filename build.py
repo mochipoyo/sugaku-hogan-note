@@ -5,7 +5,7 @@ root = Path(__file__).parent
 src = root / "src"
 shell = (src / "shell.html").read_text(encoding="utf-8")
 body = (src / "body.html").read_text(encoding="utf-8")
-js = "\n".join((src / f).read_text(encoding="utf-8") for f in ["gen.js", "labs.js", "app.js"])
+js = "\n".join((src / f).read_text(encoding="utf-8") for f in ["gen.js", "extra.js", "labs.js", "app.js"])
 # body.html は <title>・<link>・<style> と本文マークアップを含む。head 部分と本文を分ける
 head_part, _, markup = body.partition("</style>")
 html = shell.replace("<!--BODY-->", head_part + "</style>").replace("</head>", "</head>\n<body>\n" + markup.strip() + "\n<script>\n" + js + "\n</script>\n</body>\n</html>\n", 1)
